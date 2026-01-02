@@ -3,10 +3,7 @@ import { createContext, useState, useEffect, useRef } from "react"
 export const PostalContext = createContext()
 export const PostalProvider = (props) => {
     const abortControllerRef = useRef(null);
-    const [codigoPostal, setCodigoPostal] = useState("")
-    const [adressData, setAdressData] = useState([])
-    const [arraySelect, setArraySelect] = useState([[], [], [], [], [], []])
-    const [selectedValues, setSelectedValues] = useState({
+    const emptyData = {
         comunidad: '',
         provincia: '',
         municipio: '',
@@ -17,7 +14,12 @@ export const PostalProvider = (props) => {
         piso: '',
         nPuerta: '',
         notas: ''
-    })
+    }
+    const [labelMsg, setLabelMsg] = useState("")
+    const [codigoPostal, setCodigoPostal] = useState("")
+    const [adressData, setAdressData] = useState([])
+    const [arraySelect, setArraySelect] = useState([[], [], [], [], [], []])
+    const [selectedValues, setSelectedValues] = useState(emptyData)
 
     const API_KEY = import.meta.env.VITE_KEY_GEOAPI;
     const BASE_URL = 'https://apiv1.geoapi.es'
@@ -55,6 +57,14 @@ export const PostalProvider = (props) => {
             setCodigoPostal(codigoPostal)
             const arrayData = [dataComunidades, dataProvincias, dataMunicipios, dataPoblaciones, dataNucleos, dataVias]
             setAdressData(arrayData)
+            setSelectedValues(emptyData)
+
+            if (dataComunidades.data.length == 0) {
+                setLabelMsg("Este Código Postal no pertenece a ninguna zona")
+            } else {
+                setLabelMsg("")
+            }
+
         } catch (error) {
             console.log('Error fetching address data:', error)
         }
@@ -161,11 +171,11 @@ export const PostalProvider = (props) => {
     }
 
     // Actualizar selección de un nivel
-    const updateSelection = (level, valueName) => {
+    const updateSelection = (level, valueName, tipoVia) => {
         const keys = ['comunidad', 'provincia', 'municipio', 'poblacion', 'nucleo', 'via', 'nCalle', 'piso', 'nPuerta', 'notas']
         setSelectedValues(prev => ({
             ...prev,
-            [keys[level]]: valueName
+            [keys[level]]: tipoVia != '' && tipoVia != undefined ? `${tipoVia} ${valueName}` : valueName
         }))
     }
 
@@ -201,9 +211,13 @@ export const PostalProvider = (props) => {
             adressData,
             arraySelect,
             selectedValues,
+            labelMsg,
+            emptyData, 
+            setLabelMsg,
             getAdress,
             fetchCascade,
-            updateSelection
+            updateSelection,
+            setSelectedValues
         }}>
             {props.children}
         </PostalContext.Provider>

@@ -25,7 +25,7 @@ export const Select = ({ selectPointer }) => {
             setSelected(selectedId)
 
             // Actualizar el contexto
-            updateSelection(selectPointer, selectedItem.name)
+            updateSelection(selectPointer, selectedItem.name, selectedItem.tipo != '' ? selectedItem.tipo : "")
 
             // Disparar fetch en cascada para el siguiente nivel
             await fetchCascade(selectPointer, selectedId, selectedItem)
@@ -43,12 +43,12 @@ export const Select = ({ selectPointer }) => {
             // Si solo hay una opción, seleccionarla automáticamente
             const singleOption = currentOptions[0]
             setSelected(singleOption.id)
-            updateSelection(selectPointer, singleOption.name)
+            updateSelection(selectPointer, singleOption.name, singleOption.tipo != '' ? singleOption.tipo : "")
             fetchCascade(selectPointer, singleOption.id, singleOption)
         } else if (currentOptions?.length === 0) {
             // Si no hay opciones, limpiar selección
             setSelected('')
-            updateSelection(selectPointer, '')
+            updateSelection(selectPointer, '', '')
         }
     }, [arraySelect[selectPointer]])
 

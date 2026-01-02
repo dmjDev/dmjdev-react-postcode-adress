@@ -4,34 +4,31 @@ import { Select } from "./Select"
 
 export const Postal = () => {
     const [inputValue, setInputValue] = useState("")
-    const [labelMsg, setLabelMsg] = useState("")
-
-    const { getAdress, selectedValues, updateSelection } = useContext(PostalContext)
+    const { getAdress, selectedValues, setSelectedValues, emptyData, updateSelection, labelMsg, setLabelMsg } = useContext(PostalContext)
 
     const onInputChange = (e) => {
         if (/^[0-9]*$/.test(e.target.value) || e.key === 'Backspace') {
             setInputValue(e.target.value)
         }
     }
-
     const onInputKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             return false;
         }
     }
-
-    const handleInputData = (e) => {
-        updateSelection(e.target.id, e.target.value)
+    
+    const handleInputChange = (e) => {
+        updateSelection(e.target.id, e.target.value, '')
     }
 
     const onClickCP = async (e) => {
         e.preventDefault()
         const trimData = inputValue.trim()
         if (trimData !== '' && trimData.length === 5) {
+            setSelectedValues(emptyData)
             setLabelMsg("Cargando datos ...")
             await getAdress(trimData)
-            setLabelMsg("")
         } else {
             setLabelMsg("Debe introducir un código postal correcto")
         }
@@ -51,7 +48,7 @@ export const Postal = () => {
                     placeholder="Código Postal"
                     value={inputValue}
                     onChange={onInputChange}
-                    onKeyDown={onInputKeyDown}
+                    onKeyDown={onInputKeyDown} 
                     style={{ "width": "150px" }}
                     maxLength="5"
                     required
@@ -73,13 +70,45 @@ export const Postal = () => {
                     <div className="grid-item">Via</div>
                     <div className="grid-item"><Select selectPointer={5} /></div>
                     <div className="grid-item">Número de calle</div>
-                    <div className="grid-item"><input required type="text" id="6" name="nCalle" onBlur={handleInputData} onKeyDown={onInputKeyDown} style={{ "textAlign": "left" }}></input></div>
+                    <div className="grid-item"><input required
+                        type="text"
+                        id="6"
+                        name="nCalle"
+                        value={selectedValues.nCalle}
+                        onChange={handleInputChange}
+                        onKeyDown={onInputKeyDown}
+                        style={{ "textAlign": "left" }}
+                    ></input></div>
                     <div className="grid-item">Piso</div>
-                    <div className="grid-item"><input type="text" id="7" name="piso" onBlur={handleInputData} onKeyDown={onInputKeyDown} style={{ "textAlign": "left" }}></input></div>
+                    <div className="grid-item"><input
+                        type="text"
+                        id="7"
+                        name="piso"
+                        value={selectedValues.piso}
+                        onChange={handleInputChange}
+                        onKeyDown={onInputKeyDown}
+                        style={{ "textAlign": "left" }}
+                    ></input></div>
                     <div className="grid-item">Número de puerta</div>
-                    <div className="grid-item"><input type="text" id="8" name="nPuerta" onBlur={handleInputData} onKeyDown={onInputKeyDown} style={{ "textAlign": "left" }}></input></div>
+                    <div className="grid-item"><input
+                        type="text"
+                        id="8"
+                        name="nPuerta"
+                        value={selectedValues.nPuerta}
+                        onChange={handleInputChange}
+                        onKeyDown={onInputKeyDown}
+                        style={{ "textAlign": "left" }}
+                    ></input></div>
                     <div className="grid-item">Notas y aclaraciones</div>
-                    <div className="grid-item"><textarea id="9" name="notas" rows="4" cols="50" onBlur={handleInputData} style={{ "textAlign": "left" }}></textarea></div>
+                    <div className="grid-item"><textarea
+                        id="9"
+                        name="notas"
+                        value={selectedValues.notas}
+                        onChange={handleInputChange}
+                        rows="4"
+                        cols="50"
+                        style={{ "textAlign": "left" }}
+                    ></textarea></div>
                 </div>
                 <button type="submit">Enviar información</button>
             </form>
