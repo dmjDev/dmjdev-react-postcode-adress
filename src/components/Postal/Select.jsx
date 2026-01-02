@@ -10,25 +10,29 @@ export const Select = ({ selectPointer }) => {
     const currentKey = keys[selectPointer]
 
     const handleChange = async (e) => {
-        const selectedId = e.target.value
+        if (e.target.value != '') {
+            const selectedId = e.target.value
 
-        // Obtener el objeto completo si es necesario
-        const selectedItem = arraySelect[selectPointer]?.find(
-            item => item.id === selectedId
-        )
+            // Obtener el objeto completo si es necesario
+            const selectedItem = arraySelect[selectPointer]?.find(
+                item => item.id === selectedId
+            )
 
-        console.log('Selected ID:', selectedId)
-        console.log('Selected Item:', selectedItem)
+            // console.log('Selected ID:', selectedId)
+            // console.log('Selected Item:', selectedItem)
 
-        // Actualizar el estado local
-        setSelected(selectedId)
+            // Actualizar el estado local
+            setSelected(selectedId)
 
-        // Actualizar el contexto
-        updateSelection(selectPointer, selectedId)
+            // Actualizar el contexto
+            updateSelection(selectPointer, selectedItem.name)
 
-        // Disparar fetch en cascada para el siguiente nivel
-        await fetchCascade(selectPointer, selectedId, selectedItem)
-        console.log("export select")
+            // Disparar fetch en cascada para el siguiente nivel
+            await fetchCascade(selectPointer, selectedId, selectedItem)
+            // console.log("export select")
+        } else {
+            setSelected(0)
+        }
     }
 
     // Resetear selección cuando las opciones cambian (por cascada)
@@ -39,14 +43,13 @@ export const Select = ({ selectPointer }) => {
             // Si solo hay una opción, seleccionarla automáticamente
             const singleOption = currentOptions[0]
             setSelected(singleOption.id)
-            updateSelection(selectPointer, singleOption.id)
+            updateSelection(selectPointer, singleOption.name)
             fetchCascade(selectPointer, singleOption.id, singleOption)
         } else if (currentOptions?.length === 0) {
             // Si no hay opciones, limpiar selección
             setSelected('')
             updateSelection(selectPointer, '')
         }
-
     }, [arraySelect[selectPointer]])
 
     return (
@@ -57,6 +60,7 @@ export const Select = ({ selectPointer }) => {
                 value={selected}
                 onChange={handleChange}
                 disabled={arraySelect[selectPointer]?.length === 0}
+                required
             >
                 <option value="">Selecciona una opción</option>
                 {arraySelect[selectPointer]?.map((item) => (

@@ -1,7 +1,6 @@
-import { createContext, useState, useEffect ,useRef } from "react"
+import { createContext, useState, useEffect, useRef } from "react"
 
 export const PostalContext = createContext()
-
 export const PostalProvider = (props) => {
     const abortControllerRef = useRef(null);
     const [codigoPostal, setCodigoPostal] = useState("")
@@ -13,7 +12,11 @@ export const PostalProvider = (props) => {
         municipio: '',
         poblacion: '',
         nucleo: '',
-        via: ''
+        via: '',
+        nCalle: '',
+        piso: '',
+        nPuerta: '',
+        notas: ''
     })
 
     const API_KEY = import.meta.env.VITE_KEY_GEOAPI;
@@ -52,7 +55,6 @@ export const PostalProvider = (props) => {
             setCodigoPostal(codigoPostal)
             const arrayData = [dataComunidades, dataProvincias, dataMunicipios, dataPoblaciones, dataNucleos, dataVias]
             setAdressData(arrayData)
-            // console.log(adressData)
         } catch (error) {
             console.log('Error fetching address data:', error)
         }
@@ -90,7 +92,7 @@ export const PostalProvider = (props) => {
 
                 case 1: // Provincia seleccionada -> fetch municipios
                     if (selectedId) {
-                        const response = await fetch(`${BASE_URL}/municipios?CPRO=${selectedId}&key=${API_KEY}&format=json&version=2024`, { signal: abortControllerRef.current.signal })
+                        const response = await fetch(`${BASE_URL}/municipios?CPOS=${codigoPostal}&CPRO=${selectedId}&key=${API_KEY}&format=json&version=2024`, { signal: abortControllerRef.current.signal })
                         nextLevelData = await response.json()
                         if (nextLevelData?.data) {
                             const newArray = [...arraySelect]
@@ -106,7 +108,7 @@ export const PostalProvider = (props) => {
 
                 case 2: // Municipio seleccionado -> fetch poblaciones
                     if (selectedId) {
-                        const response = await fetch(`${BASE_URL}/poblaciones?CMUN=${selectedId}&key=${API_KEY}&format=json&version=2024`, { signal: abortControllerRef.current.signal })
+                        const response = await fetch(`${BASE_URL}/poblaciones?CPOS=${codigoPostal}&CMUN=${selectedId}&key=${API_KEY}&format=json&version=2024`, { signal: abortControllerRef.current.signal })
                         nextLevelData = await response.json()
                         if (nextLevelData?.data) {
                             const newArray = [...arraySelect]
@@ -121,7 +123,7 @@ export const PostalProvider = (props) => {
 
                 case 3: // Población seleccionada -> fetch núcleos
                     if (selectedId) {
-                        const response = await fetch(`${BASE_URL}/nucleos?CPOB=${selectedId}&key=${API_KEY}&format=json&version=2024`, { signal: abortControllerRef.current.signal })
+                        const response = await fetch(`${BASE_URL}/nucleos?CPOS=${codigoPostal}&CPOB=${selectedId}&key=${API_KEY}&format=json&version=2024`, { signal: abortControllerRef.current.signal })
                         nextLevelData = await response.json()
                         if (nextLevelData?.data) {
                             const newArray = [...arraySelect]
@@ -152,18 +154,18 @@ export const PostalProvider = (props) => {
                     break
             }
         } catch (error) {
-            console.log('Error in cascade fetch:', error)
+            console.log(`Error in cascade fetch, level ${level}:`, error)
             if (error.name === 'AbortError') return;
             throw error;
         }
     }
 
     // Actualizar selección de un nivel
-    const updateSelection = (level, value) => {
-        const keys = ['comunidad', 'provincia', 'municipio', 'poblacion', 'nucleo', 'via']
+    const updateSelection = (level, valueName) => {
+        const keys = ['comunidad', 'provincia', 'municipio', 'poblacion', 'nucleo', 'via', 'nCalle', 'piso', 'nPuerta', 'notas']
         setSelectedValues(prev => ({
             ...prev,
-            [keys[level]]: value
+            [keys[level]]: valueName
         }))
     }
 
@@ -178,6 +180,14 @@ export const PostalProvider = (props) => {
                 myData[3] = adressData[3]?.data?.map(({ CPOB: id, NENTSI50: name }) => ({ id, name })) || []
                 myData[4] = adressData[4]?.data?.map(({ CNUC: id, NENTSIC: nucleo, NNUCLE: name }) => ({ id, nucleo, name })) || []
                 myData[5] = adressData[5]?.data?.map(({ CVIA: id, TVIA: tipo, NVIAC: name }) => ({ id, tipo, name })) || []
+
+                let five = myData[5]
+                const modifiedFive = five.map(via => ({
+                    ...via,
+                    id: `${via.id}${Math.floor(Math.random() * 99)}`
+                }));
+                myData[5] = modifiedFive
+
             } catch (error) {
                 console.log(error, "Datos no encontrados")
             }
