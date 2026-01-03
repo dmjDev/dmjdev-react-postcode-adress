@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react-swc'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/dmjdev-postcode-adress/'
+  base: '/dmjdev-react-postcode-adress/'
 })
